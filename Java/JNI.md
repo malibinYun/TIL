@@ -1,4 +1,46 @@
-# NDK
+# JNI(Java Native Interface)
+
+> JVM(Java Virtual Machine)위에서 실행되고 있는 Java 코드가 native 응용프로그램, C, C++ 같은 다른언어들로 작성된 라이브러리들을 호출하거나 반대로 호출 되는 것을 가능케 하는 프로그래밍 프레임워크.
+>
+> \- 출처 : wikipedia
+
+```kotlin
+// Kotlin
+class Foo {
+    init {
+        System.loadLibrary("HelloWorld")
+    }
+    external fun bar()
+}
+```
+
+
+
+```java
+// Java
+public class Foo {
+    static {
+        System.loadLibrary("HelloWorld");
+    }
+    public native void bar();
+}
+```
+
+
+
+```c++
+extern "C" 
+JNIEXPORT void JNICALL
+Java_com_malibin_example_Foo_bar(JNIEnv *env, jobject obj)
+{
+    printf("Hello World!\n");
+    return;
+}
+```
+
+* 파일 확장자가 cpp라면 extern "C" 가 필요하다.
+
+
 
 ## Java Object 생성
 
@@ -30,7 +72,7 @@ class에 디폴트 생성자 (파라미터가 아무것도 없는 생성자)가 
 
 ```kotlin
 // Kotlin Code
-class Foo(val left:Int, val right:Int)
+class Foo(val left: Int, val right: Int)
 ```
 
 ```c++
@@ -44,14 +86,12 @@ return env->NewObject(fooClass, constructor);
 
 ```kotlin
 // Kotlin Code
-class Foo(val left:Int, val right:Int){
+class Foo(val left: Int, val right: Int){
     constructor(): this(0, 0)
 }
 ```
 
 위 처럼 아무것도 없는 생성자를 하나 만들어준다면 해결 가능하긴 하다.
-
-
 
 
 
@@ -61,11 +101,20 @@ class Foo(val left:Int, val right:Int){
 static jobjectArray createJavaObjectArray(JNIEnv* env){
     int size = 10;
     jclass fooClass = env->FindClass("com/malibin/example/Foo");
-    return (jobjectArray)env->NewObjectArray(size, fooClass, NULL);
+    jobjectArray fooArray = (jobjectArray)env->NewObjectArray(size, fooClass, NULL);
+    
+    for(int = 0; i<size; i++){
+        jmethodID constructor = env->GetMethodID(fooClass, "<init>", "()V");
+        jobject fooObject = env->NewObject(detectedFaceClass, constructor);
+        env->SetObjectArrayElement(fooArray, i, fooObject);
+    }
+    return jobjectArray
 }
 ```
 
+사이즈를 정해서 빈 Array를 먼저 만든 뒤
 
+env->SetObjectArrayElement 함수를 사용해 각 Array의 내용을 채운다.
 
 
 
@@ -89,19 +138,43 @@ jfieldID fieldLabel = env->GetFieldID(fooClass, "label", "Ljava/lang/String;");
 
 env->SetIntField(fooObject, fieldNumber, 10);
 env->SetObjectField(fooObject, fieldLabel, "bar");
+
+jint number = env->GetIntField(fooObject, fieldNumber);
+jobject label = env->GetObjectField(fooObject, fieldLabel);
 ```
 
-
+1. Signiture에 맞는 필드 아이디를 가져온다
+2. 반환 Type에 맞는 필드를 호출한다.
+3. Type에 맞는 필드를 가져온다.
 
 
 
 ## Java Method 접근
 
+```kotlin
+// Kotlin Code
+class Foo() {
+    fun isUnderZero(value: Float): Boolean
+    
+    fun plus(left: Int, right: Int): Int
+}
+```
 
+```c++
+// C++ code
+jclass fooClass = env->FindClass("com/malibin/example/Foo");
+jmethodID constructor = env->GetMethodID(fooClass, "<init>", "()V");
+jobject fooObject = env->NewObject(fooClass, constructor);
 
+jmethodID method_isUnderZero = env->GetMethodID(fooClass, "isUnderZero", "(F)Z");
+jmethodID method_plus = env->GetMethodID(fooClass, "plus", "(II)I");
 
+env->CallBooleanMethod(fooObject, method_isUnderZero, 0.5f);
+env->CallIntMethod(fooObject, method_plus, 1, 3);
+```
 
-
+1. Signiture에 맞는 메서드 아이디를 가져온다
+2. 반환 Type에 맞는 메서드를 호출한다.
 
 
 
@@ -114,8 +187,6 @@ static void foo(const std::string& label){
     jstring javaString = (jstring)(env->NewStringUTF(label.c_str()));
 }
 ```
-
-
 
 
 
