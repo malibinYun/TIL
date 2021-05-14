@@ -183,3 +183,10 @@ solvePnPRansac 메서드는 강력하게 pose를 추정하기 위해 [Random Sam
 
 ![255px-Line_with_outliers.svg](image\255px-Line_with_outliers.svg.png) ![255px-Fitted_line.svg](image\255px-Fitted_line.svg.png)
 
+
+
+
+
+## 출처
+
+https://learnopencv.com/head-pose-estimation-using-opencv-and-dlib/
