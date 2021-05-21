@@ -197,3 +197,23 @@ obj 파일에 대한 resource id만 알려주면, 내부적으로 mtl 파일과 
 <img src="image/KakaoTalk_20210520_205346340_01.jpg" width="30%"> 
 <img src="image/KakaoTalk_20210520_205346340.jpg" width="30%"> 
 </p>
+
+
+
+
+
+## 모델 회전 시키는 방법
+
+단순히 해당 모델의 인스턴스를 멤버변수로 두고, 상태를 변경시켜주면 된다.
+
+```kotlin
+private var renderingObject: Object3D? = null
+
+fun changeRotationOfObject(x: Double, y: Double, z: Double) {
+    renderingObject?.setRotation(x, y, z)
+}
+fun changeCameraTransition(x: Double, y: Double, z: Double) {
+    currentCamera.setPosition(x, y, z)
+}
+```
+
